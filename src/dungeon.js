@@ -1,3 +1,11 @@
+// Best practices for configuration:
+// maxTileUsagePercent directly controls how many spaces will be on the map.
+// A 10 by 10 map with a 0.6 usage percent results in a map with 60 used tiles and 40 unused.
+// When deciding on chanceToBuild values, consider the number of tiles that will be used.
+// The map chanceToBuild will control how populated your map is with buildables.
+// The buildable chanceToBuild will how likely that buildable is to be used.
+//
+
 const defaultConfig = {
   xLength: 10,
   yHeight: 10,
@@ -8,10 +16,36 @@ const defaultConfig = {
   playerValue: "@",
   startValue: "S",
   placeholderValue: "!",
+  // should this just be an int and enforce that it's < x*y?
   maxTileUsagePercent: 0.6,
   chanceToBuild: 0.5,
-  fog: null,
+  fogRadius: null,
+  buildables: {
+    goblin: {
+      chanceToBuild: 0.1,
+      value: "G",
+      max: 10,
+    },
+    imp: {
+      chanceToBuild: 0.1,
+      value: "I",
+      max: 5,
+    },
+    gold: {
+      chanceToBuild: 0.025,
+      value: "*",
+      max: 5,
+    },
+  },
 };
+
+// var buildables = Object.entries(config.buildables);
+// buildables.length;
+// Object.entries(config.buildables).forEach((buildable) => {
+//   var name = buildable[0] + (buildables.length += 1);
+//   buildables[name] = { .. }
+// })
+// var newMapItem = { }
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -22,10 +56,7 @@ function randomIntFromInterval(min, max) {
 //  mapArray
 //  config,
 //  player: {postion,...}
-//  actors: [{postion,...}]
-//  items: [{postion,...}]
-//  or
-//  collections: {key1: items,...}
+//  collection: {},
 //  generate(),
 //  setPlayerPosition(newX, newY, currX, currY)
 //  setActorPosition(newX, newY, currX, currY)
@@ -128,20 +159,31 @@ function Dungeon(args) {
       // determine what to build and always default to an empty space
       // TODO: iterate collections and set appropriate values
       if (config.collections) {
-        config.collections.every((collection) => {
+        const buildables = Object.entries(config.buildables);
+
+        Object.entries(config.buildables).every((buildable) => {
+          const key = buildable[0];
+          const name = key + (buildables.length += 1);
+          const item = buildable[1];
+
           if (
-            collection.items &&
-            Math.random() < collection.chance &&
-            collections[collection] &&
-            collections[collection].length <= collection.max
+            collections[key] &&
+            Math.random() < item.chanceToBuild &&
+            collections[key] &&
+            collections[key].length <= item.max
           ) {
-            collection.items.every((item) => {
-              space.spaceValue = item.spaceValue;
-              space.collection = collection;
-              space.item = item;
-              space.built = true;
-              return true;
-            });
+            space.spaceValue = item.spaceValue;
+            space.collection = collection;
+            space.item = item;
+            space.built = true;
+            space.spaceValue = item.spaceValue;
+            space.x = builder.x;
+            space.y = builder.y;
+            space.built = true;
+            space.itemKey = name;
+            space.item = item;
+            space.built = true;
+            return false;
           }
           return true;
         });
@@ -282,9 +324,9 @@ function Dungeon(args) {
         const pY = this.playerCoords.y;
         const distanceFromPlayer = Math.sqrt((x - pX) ** 2 + (y - pY) ** 2);
         // TODO: make fog space configurale
-        if (this.config.fog) {
+        if (this.config.fogRadius) {
           mapString +=
-            distanceFromPlayer <= this.config.fog
+            distanceFromPlayer <= this.config.fogRadius
               ? col
               : "<span style='background-color:#999;color:grey;'>?</span>";
         } else {
