@@ -169,17 +169,14 @@ function Dungeon(args) {
           if (
             collections[key] &&
             Math.random() < item.chanceToBuild &&
-            collections[key] &&
             collections[key].length <= item.max
           ) {
             space.spaceValue = item.spaceValue;
-            space.collection = collection;
+            space.collection = key;
             space.item = item;
-            space.built = true;
             space.spaceValue = item.spaceValue;
             space.x = builder.x;
             space.y = builder.y;
-            space.built = true;
             space.itemKey = name;
             space.item = item;
             space.built = true;
