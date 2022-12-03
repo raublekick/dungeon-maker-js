@@ -7,10 +7,10 @@
 //
 
 const defaultConfig = {
-  xLength: 10,
-  yHeight: 10,
-  xStart: 0,
-  yStart: 0,
+  xLength: 100,
+  yHeight: 100,
+  xStart: 50,
+  yStart: 50,
   defaultSpaceValue: "X",
   defaultBuiltSpaceValue: ".",
   playerValue: "@",
@@ -23,17 +23,17 @@ const defaultConfig = {
   buildables: {
     goblin: {
       chanceToBuild: 0.1,
-      value: "G",
+      spaceValue: "G",
       max: 10,
     },
     imp: {
       chanceToBuild: 0.1,
-      value: "I",
+      spaceValue: "I",
       max: 5,
     },
     gold: {
       chanceToBuild: 0.025,
-      value: "*",
+      spaceValue: "*",
       max: 5,
     },
   },
@@ -91,7 +91,7 @@ function Dungeon(args) {
   let built;
   let moved;
 
-  const collections = [];
+  const collections = {};
 
   // Initializes the map to requested size with default space
   function initialize() {
@@ -158,7 +158,7 @@ function Dungeon(args) {
     if (Math.random() < config.chanceToBuild) {
       // determine what to build and always default to an empty space
       // TODO: iterate collections and set appropriate values
-      if (config.collections) {
+      if (config.buildables) {
         const buildables = Object.entries(config.buildables);
 
         Object.entries(config.buildables).every((buildable) => {
@@ -166,15 +166,17 @@ function Dungeon(args) {
           const name = key + (buildables.length += 1);
           const item = buildable[1];
 
+          if (!collections[key]) {
+            collections[key] = [];
+          }
+
           if (
-            collections[key] &&
             Math.random() < item.chanceToBuild &&
             collections[key].length <= item.max
           ) {
             space.spaceValue = item.spaceValue;
             space.collection = key;
             space.item = item;
-            space.spaceValue = item.spaceValue;
             space.x = builder.x;
             space.y = builder.y;
             space.itemKey = name;
@@ -202,6 +204,7 @@ function Dungeon(args) {
   }
 
   // update the provided collection with the appropriate item
+  // TODO: figure out how I want to store items in the collectoin. Array or keyed object?
   function updateCollection(collection, item) {
     if (collection && item) collections[collection].push(item);
   }
@@ -215,8 +218,6 @@ function Dungeon(args) {
 
   function updateDungeonState(builder) {
     // update Dungeon state
-
-    // TODO: Fix this incorrectly incrementing all the time
     if (builder.built) {
       xCurr = builder.x;
       yCurr = builder.y;
