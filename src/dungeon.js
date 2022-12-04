@@ -7,10 +7,10 @@
 //
 
 const defaultConfig = {
-  xLength: 100,
-  yHeight: 100,
-  xStart: 50,
-  yStart: 50,
+  xLength: 10,
+  yHeight: 5,
+  xStart: 0,
+  yStart: 0,
   defaultSpaceValue: "X",
   defaultBuiltSpaceValue: ".",
   playerValue: "@",
@@ -99,8 +99,8 @@ function Dungeon(args) {
     // TODO: Make sure x and y are correct
 
     // add that column to each row
-    const x = Array.from({ length: config.xLength }, () =>
-      Array.from({ length: config.yHeight }, () => config.defaultSpaceValue)
+    const x = Array.from({ length: config.yHeight }, () =>
+      Array.from({ length: config.xLength }, () => config.defaultSpaceValue)
     );
     return x;
   }
