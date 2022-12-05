@@ -3,17 +3,21 @@ import { config, Dungeon } from "../../src/dungeon";
 import { ref } from "vue";
 
 // dynamically set size based on viewport
-// ratio to multiply map by needs to be calculated https://stackoverflow.com/questions/15574288/pixel-width-of-monospace-character
+// ratio to divide mapWidth by needs to be calculated https://stackoverflow.com/questions/15574288/pixel-width-of-monospace-character
 // add a max fontSize so it doesn't get too big
 // add functions to dungeon to calculate based on given height
 let viewportHeight = window.innerHeight;
 let viewportWidth = window.innerWidth;
 let viewportRatio = viewportHeight / viewportWidth;
 let mapWidth = null;
-let mapHeight = 10; //Math.floor(mapWidth * viewportRatio);
-let lineHeight = 1; // vh
-let fontSize = ref((viewportHeight / mapHeight / viewportHeight) * 100 + "vh"); // vh
-mapWidth = Math.floor(mapHeight / viewportRatio / 0.6);
+// higher than 100 at 1440p maximized Firefox window starts to become incredibly difficult to see, and scales poorly with the ratio
+let mapHeight = 100; //Math.floor(mapWidth * viewportRatio);
+// reduce to (1/mapHeight) * 100??
+let fontSize = ref(
+  (viewportHeight / (mapHeight + 1) / viewportHeight) * 100 + "vh"
+); // vh
+let characterRatio = 0.54;
+mapWidth = Math.floor(mapHeight / viewportRatio / characterRatio);
 let letterSpacing = ref(fontSize / 2);
 
 config.xLength = mapWidth;
@@ -37,7 +41,7 @@ console.log(dungeonMap);
 
 <style scoped>
 .map {
-  font-family: "Courier New", Courier, monospace;
+  font-family: monospace;
   line-height: v-bind(fontSize);
   font-size: v-bind(fontSize);
   letter-spacing: v-bind(letterSpacing);
